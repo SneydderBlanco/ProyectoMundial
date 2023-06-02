@@ -2,6 +2,7 @@ package proyectomundial;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -265,39 +266,41 @@ public class GUIManual extends JFrame {
      * con la información de las selelecciones
      */
     private void accionSelecciones() {
-        jLabelTop.setText("Selecciones");
-        selecciones = seleccionDAO.getSeleccionesMatriz();
+    jLabelTop.setText("Selecciones");
+    selecciones = seleccionDAO.getSeleccionesMatriz();
+    auditoriaDAO.actualizarContador("Selecciones");
 
-        auditoriaDAO.actualizarContador("Selecciones");
-
-        // Si no hay selecciones cargadas, muestra el botón de carga de selecciones
-        if (selecciones == null) {
-            jPanelMain.removeAll();
-            JPanel seleccionesPanel = new JPanel();
-
-            JLabel notSelecciones = new JLabel();
-            notSelecciones.setText("No hay selecciones cargadas, por favor cargue selecciones \n\n");
-            seleccionesPanel.add(notSelecciones);
-
-            JButton cargarFile = new JButton();
-            cargarFile.setText("Seleccione el archivo");
-            seleccionesPanel.add(cargarFile);
-            cargarFile.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent evt) {
-                    cargarFileSelecciones();
-                }
-            });
-
-            jPanelMain.add(seleccionesPanel);
-            jPanelMain.repaint();
-            jPanelMain.revalidate();
-        }
-        // Si hay selecciones cargadas, llama el método que permite pintar la tabla de
-        // selecciones
-        else {
-            pintarTablaSelecciones();
-        }
+    if (selecciones == null) {
+        showNoSeleccionesPanel();
+    } else {
+        pintarTablaSelecciones();
     }
+}
+
+private void showNoSeleccionesPanel() {
+    jPanelMain.removeAll();
+    JPanel seleccionesPanel = new JPanel();
+
+    JLabel notSelecciones = new JLabel();
+    notSelecciones.setText("No hay selecciones cargadas, por favor cargue selecciones \n\n");
+    seleccionesPanel.add(notSelecciones);
+
+    JButton cargarFile = new JButton();
+    cargarFile.setText("Seleccione el archivo");
+    seleccionesPanel.add(cargarFile);
+    cargarFile.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent evt) {
+            cargarFileSelecciones();
+        }
+    });
+
+    jPanelMain.add(seleccionesPanel);
+    jPanelMain.repaint();
+    jPanelMain.revalidate();
+}
+
+
+
 
     /**
      * Función que se encarga de ajustar los elementos gráficos que componente la
@@ -336,43 +339,106 @@ public class GUIManual extends JFrame {
      * archivo CSV
      * con la información de los resultados
      */
+    
     private void accionResultados() {
-        jLabelTop.setText("Resultados");
-        resultados = resultadoDAO.getResultadoMatriz();
+    jLabelTop.setText("Resultados");
+    resultados = resultadoDAO.getResultadoMatriz();
+    auditoriaDAO.actualizarContador("Resultados");
 
-        auditoriaDAO.actualizarContador("Resultados");
+    if (resultados == null) {
+        showNoResultadosPanel();
+    } else {
+        pintarTablaResultados();
+    }
+}
 
-        // Si no hay resultados cargados, muestra el botón de carga de resultados
-        if (resultados == null) {
-            jPanelMain.removeAll();
-            JPanel resultadosPanel = new JPanel();
+    private void showNoResultadosPanel() {
+        jPanelMain.removeAll();
+        JPanel resultadosPanel = new JPanel();
 
-            if (resultados == null) {
+        JLabel notResultados = new JLabel();
+        notResultados.setText("No hay resultados, por favor cargue resultados \n\n");
+        resultadosPanel.add(notResultados);
 
-                JLabel notResultados = new JLabel();
-                notResultados.setText("No hay resultados, por favor cargue resultados \n\n");
-                resultadosPanel.add(notResultados);
-
-                JButton cargarFile = new JButton();
-                cargarFile.setText("Seleccione el archivo");
-                resultadosPanel.add(cargarFile);
-                cargarFile.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent evt) {
-                        cargarFileResultados();
-                    }
-                });
+        JButton cargarFile = new JButton();
+        cargarFile.setText("Seleccione el archivo");
+        resultadosPanel.add(cargarFile);
+        cargarFile.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                cargarFileResultados();
             }
+        });
 
-            jPanelMain.add(resultadosPanel);
-            jPanelMain.repaint();
-            jPanelMain.revalidate();
-        }
-        // Si hay ressultados cargados, llama el método que permite pintar la tabla de
-        // resultados
-        else {
+        jPanelMain.add(resultadosPanel);
+        jPanelMain.repaint();
+        jPanelMain.revalidate();
+    }
+
+    public void pintarTablaResultados() {
+        String[] columnNames = { "ID", "Grupo", "Local", "Visitante", "Continente L", "Continente V", "Goles L", "Goles V" };
+        JTable table = new JTable(resultados, columnNames);
+        table.setRowHeight(20);
+
+        JPanel form = new JPanel();
+        form.setLayout(new GridLayout(4, 1, 0, 0));
+
+        JLabel label = new JLabel();
+        label.setText("Busqueda de Resultados");
+        form.add(label);
+
+        JTextField field = new JTextField();
+        form.add(field);
+
+        JPanel panelBotones = new JPanel();
+        panelBotones.setLayout(new GridLayout(1, 2, 30, 0));
+
+        JButton buscar = new JButton();
+        buscar.setText("Buscar");
+        buscar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                if (!field.getText().equalsIgnoreCase("")) {
+                    buscarResultado(field.getText());
+                }
+            }
+        });
+        panelBotones.add(buscar);
+
+        JButton limpiar = new JButton();
+        limpiar.setText("Ver Todos");
+        limpiar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                resultados = resultadoDAO.getResultadoMatriz();
+                pintarTablaResultados();
+            }
+        });
+        panelBotones.add(limpiar);
+        form.add(panelBotones);
+
+        JPanel resultadosPanel = new JPanel();
+        resultadosPanel.setLayout(new BoxLayout(resultadosPanel, BoxLayout.Y_AXIS));
+        resultadosPanel.setPreferredSize(new Dimension(620, 410));
+        resultadosPanel.setMaximumSize(jPanelRight.getPreferredSize());
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        resultadosPanel.add(form);
+        resultadosPanel.add(scrollPane);
+
+        jPanelMain.removeAll();
+        jPanelMain.add(resultadosPanel, BorderLayout.PAGE_START);
+        jPanelMain.repaint();
+        jPanelMain.revalidate();
+    }
+
+    public void buscarResultado(String dato) {
+        String[][] test = resultadoDAO.getResultadoMatriz(dato);
+        if (test != null) {
+            resultados = test;
             pintarTablaResultados();
+        } else {
+            JOptionPane.showMessageDialog(jPanelMain, "Palabra desconocida.");
         }
     }
+
 
     /**
      * Función que se encarga de ajustar los elementos gráficos que componente la
@@ -435,113 +501,92 @@ public class GUIManual extends JFrame {
      * }
      */
     private void accionDashboardSel() {
-        jLabelTop.setText("Dash Selecciones");
+    jLabelTop.setText("Dash Selecciones");
 
-        auditoriaDAO.actualizarContador("Dash Selecciones");
+    auditoriaDAO.actualizarContador("Dash Selecciones");
 
-        selecciones = seleccionDAO.getSeleccionesMatriz();
-        if (selecciones == null) {
-            accionSelecciones();
-        } else {
-            String[] columnNames = { "ID", "Selección", "Continente", "DT", "Nacionalidad DT" };
-            pintarTablaDashboardSel(columnNames);
-        }
+    selecciones = seleccionDAO.getSeleccionesMatriz();
+    if (selecciones == null) {
+        accionSelecciones();
+    } else {
+        String[] columnNames = { "ID", "Selección", "Continente", "DT", "Nacionalidad DT" };
+        pintarTablaDashboardSel(columnNames);
     }
+}
 
     private void pintarTablaDashboardSel(String[] columnNames) {
-
         JTable table = new JTable(selecciones, columnNames);
         table.setRowHeight(20);
+
+        JPanel dashSeleccionesPanel = new JPanel();
+        dashSeleccionesPanel.setLayout(new BorderLayout());
 
         JPanel form = new JPanel();
         form.setLayout(new GridLayout(4, 1, 0, 10));
 
-        JPanel panelSelecciones = new JPanel();
-        panelSelecciones.setLayout(new GridLayout(1, 2, 30, 0));
-
         JLabel labelSelecciones = new JLabel();
-        labelSelecciones.setText("Total de Selecciones cargadas: " + SeleccionDAO.totalInt);
-        panelSelecciones.add(labelSelecciones);
-
-        JButton verSelecciones = new JButton();
-        verSelecciones.setText("Ir a Selecciones");
-        verSelecciones.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                accionSelecciones();
-            }
-        });
-        panelSelecciones.add(verSelecciones);
-
-        form.add(panelSelecciones);
-
-        JPanel panelDirectores = new JPanel();
-        panelDirectores.setLayout(new GridLayout(1, 2, 30, 0));
+        labelSelecciones.setText("Total de Selecciones cargadas: " + seleccionDAO.totalInt);
 
         JLabel labelNacionalidad = new JLabel();
-        labelNacionalidad.setText(
-                "Total de nacionalidades diferentes de los DT: " + seleccionDAO.getNacionalidadDiferente().size());
-        panelDirectores.add(labelNacionalidad);
+        labelNacionalidad.setText("Total de nacionalidades diferentes de los DT: " + seleccionDAO.getNacionalidadDiferente().size());
+        form.add(createPanelWithLabelAndButton(labelNacionalidad, "Ver Ranking Nacionalidades DT", this::verRankingNacionalidadesDT));
 
-        JButton verDirectores = new JButton();
-        verDirectores.setText("Ver Ranking Nacionalidades DT");
-        verDirectores.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                String[] newColumnNames = { "ID", "Nacionalidad DT", "Total" };
-                selecciones = seleccionDAO.getRankingNacionalidadesDTMatriz();
-                pintarTablaDashboardSel(newColumnNames);
-            }
-        });
-        panelDirectores.add(verDirectores);
-
-        form.add(panelDirectores);
-
-        JPanel panelContinente = new JPanel();
-        panelContinente.setLayout(new GridLayout(1, 2, 30, 0));
-
-        JLabel labelContinente = new JLabel();
-        labelContinente.setText("Seleccione un Continente");
-        panelContinente.add(labelContinente);
-
-        JComboBox<String> continentes = new JComboBox<String>();
-        if (seleccionDAO.getContinenteDiferente() != null) {
-            List<Seleccion> listContinente = seleccionDAO.getContinenteDiferente();
+        JComboBox<String> continentes = new JComboBox<>();
+        List<Seleccion> listContinente = seleccionDAO.getContinenteDiferente();
+        if (listContinente != null) {
             continentes.addItem("");
-            for (int i = 0; i < listContinente.size(); i++) {
-                continentes.addItem(listContinente.get(i).getContinente());
+            for (Seleccion seleccion : listContinente) {
+                continentes.addItem(seleccion.getContinente());
             }
         }
+        JLabel labelContinente = new JLabel();
+        labelContinente.setText("Seleccione un Continente");
+        JPanel panelContinente = new JPanel();
+        panelContinente.setLayout(new GridLayout(1, 2, 30, 0));
+        panelContinente.add(labelContinente);
         panelContinente.add(continentes);
-
         form.add(panelContinente);
 
-        JButton verContinente = new JButton();
-        verContinente.setText("Ver Selecciones del Continente seleccionado");
-        verContinente.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                selecciones = seleccionDAO.getSeleccionesMatriz((String) continentes.getSelectedItem());
-                String[] columnNames = { "ID", "Selección", "Continente", "DT", "Nacionalidad DT" };
-                pintarTablaDashboardSel(columnNames);
-            }
-        });
+        form.add(createButtonPanel("Ver Selecciones del Continente seleccionado", () -> verSeleccionesPorContinente((String) continentes.getSelectedItem())));
 
-        form.add(verContinente);
-
-        JPanel dashSeleccionesPanel = new JPanel();
-        dashSeleccionesPanel.setLayout(new BoxLayout(dashSeleccionesPanel, BoxLayout.Y_AXIS));
-        dashSeleccionesPanel.setPreferredSize((new java.awt.Dimension(610, 410)));
-        dashSeleccionesPanel.setMaximumSize(jPanelRight.getPreferredSize());
-
-        JScrollPane scrollPane = new JScrollPane(table);
-        dashSeleccionesPanel.add(form);
-        dashSeleccionesPanel.add(scrollPane);
+        dashSeleccionesPanel.add(form, BorderLayout.NORTH);
+        dashSeleccionesPanel.add(new JScrollPane(table), BorderLayout.CENTER);
 
         jPanelMain.removeAll();
-        jPanelMain.add(dashSeleccionesPanel, BorderLayout.PAGE_START);
-
-        jPanelMain.repaint();
+        jPanelMain.add(dashSeleccionesPanel);
         jPanelMain.revalidate();
+        jPanelMain.repaint();
     }
 
+    private JPanel createPanelWithLabelAndButton(JLabel label, String buttonText, ActionListener listener) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new GridLayout(1, 2, 30, 0));
+        panel.add(label);
+        JButton button = new JButton();
+        button.setText(buttonText);
+        button.addActionListener(listener);
+        panel.add(button);
+        return panel;
+    }
+
+    private JPanel createButtonPanel(String buttonText, Runnable action) {
+        JPanel panel = new JPanel();
+        JButton button = new JButton();
+        button.setText(buttonText);
+        button.addActionListener(e -> action.run());
+        panel.add(button);
+        return panel;
+    }
+
+    private void verRankingNacionalidadesDT(ActionEvent evt) {
+        String[] columnNames = { "ID", "Nacionalidad DT", "Total" };
+        selecciones = seleccionDAO.getRankingNacionalidadesDTMatriz();
+        pintarTablaDashboardSel(columnNames);
+    }
+
+    private void verSeleccionesPorContinente(String continente) {
+        selecciones = seleccionDAO.getSeleccionesMatriz(continente);
+    }
     /**
      * Función que se encarga de ajustar los elementos gráficos que componente la
      * opción de navegación de Dashboard de Resultados
@@ -700,10 +745,6 @@ public class GUIManual extends JFrame {
 
         form.add(panelResultados);
 
-        String informacion = "\nPromedio de goles : " + resultadoDAO.promedioGoles+ "\n N° Partidos con ganador : " + resultadoDAO.cantPartidosGanadorEmpate[0]+"\n Número partidos Empatados : " + resultadoDAO.cantPartidosGanadorEmpate[1];
-        JLabel labelInfo = new JLabel();
-        labelInfo.setText(informacion);
-        form.add(labelInfo);
 
         JPanel dashResultadosPanel = new JPanel();
         dashResultadosPanel.setLayout(new BoxLayout(dashResultadosPanel, BoxLayout.Y_AXIS));
@@ -930,72 +971,7 @@ public class GUIManual extends JFrame {
      * Columnas que se corresponden son la información que fue leida desde el
      * archivo csv
      */
-    public void pintarTablaResultados() {
-
-        String[] columnNames = { "ID", "Grupo", "Local", "Visitante", "Continente L", "Continente V", "Goles L",
-                "Goles V" };
-        JTable table = new JTable(resultados, columnNames);
-        table.setRowHeight(20);
-
-        JPanel form = new JPanel();
-        form.setLayout(new GridLayout(4, 1, 0, 0));
-
-        JLabel label = new JLabel();
-        label.setText("Busqueda de Resultados");
-        form.add(label);
-
-        JTextField field = new JTextField();
-        form.add(field);
-
-        JPanel panelBotones = new JPanel();
-        panelBotones.setLayout(new GridLayout(1, 2, 30, 0));
-
-        JButton buscar = new JButton();
-        buscar.setText("Buscar");
-        buscar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                if (!field.getText().equalsIgnoreCase("")) {
-                    buscarResultado(field.getText());
-                }
-            }
-        });
-        panelBotones.add(buscar);
-
-        JButton limpiar = new JButton();
-        limpiar.setText("Ver Todos");
-        limpiar.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent evt) {
-                resultados = resultadoDAO.getResultadoMatriz();
-                pintarTablaResultados();
-            }
-        });
-        panelBotones.add(limpiar);
-        form.add(panelBotones);
-
-        JPanel seleccionesPanel = new JPanel();
-        seleccionesPanel.setLayout(new BoxLayout(seleccionesPanel, BoxLayout.Y_AXIS));
-        seleccionesPanel.setPreferredSize((new java.awt.Dimension(620, 410)));
-        seleccionesPanel.setMaximumSize(jPanelRight.getPreferredSize());
-
-        JScrollPane scrollPane = new JScrollPane(table);
-        seleccionesPanel.add(form);
-        seleccionesPanel.add(scrollPane);
-
-        jPanelMain.removeAll();
-        jPanelMain.add(seleccionesPanel, BorderLayout.PAGE_START);
-        jPanelMain.repaint();
-        jPanelMain.revalidate();
-    }
-
-    public void buscarResultado(String dato) {
-        String[][] test = resultadoDAO.getResultadoMatriz(dato);
-        if (test != null) {
-            resultados = test;
-            pintarTablaResultados();
-        } else {
-            JOptionPane.showMessageDialog(jPanelMain, "Palabra desconocida.");
-        }
-    }
+    
 
     /**
      * Función que permite darle estilos y agregar los componentes gráficos del

@@ -8,7 +8,7 @@ import proyectomundial.util.BasedeDatos;
 
 /**
  *
- * @author Hiro & Camily
+ * @author Christian
  */
 public class ResultadoDAO {
     public static int totalInt;

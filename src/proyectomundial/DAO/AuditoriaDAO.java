@@ -7,7 +7,7 @@ import proyectomundial.model.*;
 import proyectomundial.util.BasedeDatos;
 /**
  *
- * @author Camily
+ * @author Christian
  */
 public class AuditoriaDAO {
 
